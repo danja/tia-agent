@@ -1,0 +1,24 @@
+{
+  "name": "mistral-agent-example",
+  "version": "1.0.0",
+  "description": "Minimal example XMPP agent with Mistral AI",
+  "type": "module",
+  "main": "mistral-example.js",
+  "scripts": {
+    "start": "node mistral-example.js"
+  },
+  "keywords": [
+    "xmpp",
+    "agent",
+    "mistral",
+    "ai",
+    "chatbot"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "tia-agents": "^0.4.0",
+    "hyperdata-clients": "^0.9.0",
+    "dotenv": "^17.2.0"
+  }
+}

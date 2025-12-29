@@ -1,0 +1,26 @@
+@prefix agent: <https://tensegrity.it/vocab/agent#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix schema: <https://schema.org/> .
+@prefix xmpp: <https://tensegrity.it/vocab/xmpp#> .
+@prefix ai: <https://tensegrity.it/vocab/ai-provider#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix lng: <http://purl.org/stuff/lingue/> .
+
+# Note the URI here : mistral2 is the agent's true name
+<#mistral2> a agent:ConversationalAgent, agent:AIAgent, lng:Agent ;
+  dcterms:isPartOf <#mistral-base> ;
+  foaf:nick "Mistral2" ;
+  schema:identifier "mistral2" ;
+  dcterms:created "2024-12-01T00:00:00Z"^^xsd:dateTime ;
+
+  agent:xmppAccount [
+    a xmpp:Account ;
+    xmpp:username "mistral2" ;
+    xmpp:resource "Mistral2"
+  ] ;
+
+  agent:aiProvider [
+    a ai:MistralProvider ;
+    ai:systemPrompt "You are Mistral2, a helpful assistant in an XMPP chat room, sent to make sure everything works. Keep responses concise (1-3 sentences) and conversational."
+  ] .
