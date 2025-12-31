@@ -1,0 +1,40 @@
+@prefix agent: <https://tensegrity.it/vocab/agent#> .
+@prefix schema: <https://schema.org/> .
+@prefix xmpp: <https://tensegrity.it/vocab/xmpp#> .
+@prefix ai: <https://tensegrity.it/vocab/ai-provider#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix lng: <http://purl.org/stuff/lingue/> .
+@prefix ibis: <https://vocab.methodandstructure.com/ibis#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+<#ollama-base> a agent:ConversationalAgent, agent:AIAgent, lng:Agent ;
+  schema:identifier "ollama-base" ;
+  dcterms:created "2025-12-31T00:00:00Z"^^xsd:dateTime ;
+
+  lng:supports lng:HumanChat, lng:IBISText, lng:AgentProfileExchange ;
+  lng:prefers lng:HumanChat ;
+  lng:understands <https://vocab.methodandstructure.com/ibis#> ;
+  lng:profile <#ollama-lingue-profile> ;
+
+  agent:xmppAccount [
+    a xmpp:Account ;
+    xmpp:service "xmpp://tensegrity.it:5222" ;
+    xmpp:domain "tensegrity.it"
+  ] ;
+
+  agent:roomJid "general@conference.tensegrity.it" ;
+
+  agent:aiProvider [
+    a ai:OllamaProvider ;
+    ai:model "qwen2.5:0.5b" ;
+    ai:baseURL "http://localhost:11434" ;
+    ai:apiKeyEnv "OLLAMA_API_KEY"
+  ] .
+
+<#ollama-lingue-profile> a lng:Profile ;
+  lng:availability lng:Process ;
+  lng:in [ a lng:Interface ; rdfs:label "XMPP MUC text" ] ;
+  lng:out [ a lng:Interface ; rdfs:label "XMPP MUC text + IBIS RDF" ] ;
+  lng:dependsOn [ a lng:Environment ; rdfs:label "XMPP/Prosody" ] ;
+  lng:alang "JavaScript" .

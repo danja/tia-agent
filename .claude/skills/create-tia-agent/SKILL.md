@@ -17,6 +17,7 @@ When a user wants to create a new agent, follow these steps:
 Ask the user:
 - **Agent name**: What should the agent be called? (lowercase, no spaces)
 - **LLM provider**: Which LLM API? (Mistral, Groq, Claude, OpenAI, Ollama, etc.)
+  - For Ollama: Ask which model (e.g., `qwen2.5:0.5b`, `llama2`, `mistral`)
 - **Location**: Where should the new agent directory be created? (default: `../my-agent`)
 - **Server**: Which XMPP server? (default: `tensegrity.it`)
 - **Room**: Which MUC room to join? (default: `general@conference.tensegrity.it`)
@@ -52,6 +53,8 @@ cd /path/to/new-agent
 - Update package.json `main` and `start` script if renamed
 
 ### 4. Customize the Provider
+
+**CRITICAL**: hyperdata-clients providers have different API structures. Always check `node_modules/hyperdata-clients/src/providers/` to verify the actual API for each provider.
 
 If using a different LLM provider, edit `mistral-provider.js`:
 
@@ -103,12 +106,70 @@ export class ClaudeProvider extends BaseLLMProvider {
 }
 ```
 
+**For Ollama (local models):**
+```javascript
+import { Ollama } from "hyperdata-clients";
+
+export class OllamaProvider extends BaseLLMProvider {
+  constructor({
+    apiKey = "ollama",  // Ollama doesn't need a real API key
+    baseURL = "http://localhost:11434",
+    model = "qwen2.5:0.5b",
+    nickname = "OllamaBot",
+    systemPrompt = null,
+    systemTemplate = null,
+    historyStore = null,
+    lingueEnabled = true,
+    lingueConfidenceMin = 0.5,
+    ibisSummaryEnabled = false,
+    discoFeatures = undefined,
+    xmppClient = null,
+    logger = console
+  }) {
+    super({
+      apiKey, model, nickname, systemPrompt, systemTemplate,
+      historyStore, lingueEnabled, lingueConfidenceMin,
+      ibisSummaryEnabled, discoFeatures, xmppClient, logger
+    });
+    this.baseURL = baseURL;
+  }
+
+  initializeClient(apiKey) {
+    return new Ollama({ apiKey, baseURL: this.baseURL });
+  }
+
+  async completeChatRequest({ messages, maxTokens, temperature }) {
+    // NOTE: Ollama.chat() returns text directly, not a response object
+    return await this.client.chat(messages, {
+      model: this.model,
+      temperature: temperature || 0.7,
+      num_predict: maxTokens || 1000,
+      stream: false
+    });
+  }
+
+  extractResponseText(response) {
+    // Response is already a string
+    return typeof response === 'string' ? response.trim() : null;
+  }
+}
+```
+
+**Key API differences**:
+- **Mistral/Groq/OpenAI**: Use `this.client.client.chat.*` and return full response objects
+- **Ollama**: Uses `this.client.chat(messages, options)` and returns text string directly
+- **Ollama**: Requires `baseURL` parameter and uses `num_predict` instead of `maxTokens`
+
 Update the import and class name in the main agent file accordingly.
 
 ### 5. Install and Run
 
 ```bash
 npm install
+
+# For Ollama agents, ensure the model is pulled first
+ollama pull qwen2.5:0.5b  # or your chosen model
+
 npm start
 ```
 
@@ -206,11 +267,19 @@ my-agent/
 - Verify API key is correct in `.env`
 - Check API key environment variable name matches `agent:apiKeyEnv` in profile
 - Ensure API key has necessary permissions
+- **For Ollama**: Check `OLLAMA_BASE_URL` matches your server (default: `http://localhost:11434`)
+
+### Ollama-specific issues
+- **"Cannot read properties of undefined"**: Wrong API structure - check hyperdata-clients source
+- **Model not found**: Run `ollama pull model-name` first
+- **Connection refused**: Ensure Ollama is running (`ollama serve`)
+- **Wrong base URL**: Set `OLLAMA_BASE_URL` in `.env` or pass `baseURL` to provider constructor
 
 ### Agent doesn't respond
 - Check the agent joined the room (look for presence in XMPP client)
 - Try mentioning the agent: `@agent-name hello`
 - Check logs for errors
+- **For Ollama**: Verify model is loaded with `ollama list`
 
 ### Profile loading errors
 - Verify `.ttl` syntax (common issue: missing dots at end of statements)
@@ -236,4 +305,6 @@ After creating your agent:
 
 ## Examples
 
-See [mistral-minimal/README.md](mistral-minimal/README.md) for the complete reference implementation.
+Reference implementations in this repository:
+- **Mistral**: See `mistral-provider.js` and `mistral-example.js` for cloud API pattern
+- **Ollama**: See `ollama-provider.js` and `oquen.js` for local model pattern

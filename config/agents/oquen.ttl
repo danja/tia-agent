@@ -1,0 +1,26 @@
+@prefix agent: <https://tensegrity.it/vocab/agent#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix schema: <https://schema.org/> .
+@prefix xmpp: <https://tensegrity.it/vocab/xmpp#> .
+@prefix ai: <https://tensegrity.it/vocab/ai-provider#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix lng: <http://purl.org/stuff/lingue/> .
+
+# Note the URI here : oquen is the agent's true name
+<#oquen> a agent:ConversationalAgent, agent:AIAgent, lng:Agent ;
+  dcterms:isPartOf <#ollama-base> ;
+  foaf:nick "Oquen" ;
+  schema:identifier "oquen" ;
+  dcterms:created "2025-12-31T00:00:00Z"^^xsd:dateTime ;
+
+  agent:xmppAccount [
+    a xmpp:Account ;
+    xmpp:username "oquen" ;
+    xmpp:resource "Oquen"
+  ] ;
+
+  agent:aiProvider [
+    a ai:OllamaProvider ;
+    ai:systemPrompt "You are Oquen, a helpful assistant powered by Qwen running locally via Ollama. Keep responses concise and conversational."
+  ] .
